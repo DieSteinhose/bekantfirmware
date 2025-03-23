@@ -8,7 +8,7 @@ This is a Fork from https://github.com/ivanwick/bekantfirmware with following ch
 
 ----
 
-![Position memory diagram](https://github.com/diesteinhose/bekantfirmware/desk_diagram_double.svg)
+![Position memory diagram](https://raw.githubusercontent.com/DieSteinhose/bekantfirmware/refs/heads/master/desk_diagram_double.svg)
 
 Control firmware for IKEA BEKANT adjustable-height desk with lower and upper memory positions. Can be flashed onto the OEM controller, without changing any hardware.
 
