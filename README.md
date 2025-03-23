@@ -18,7 +18,7 @@ Pre-program a sitting and standing position for your desk and move between them 
 
 Downloadable firmware images are built in MPLAB X with the XC8 compiler. The microcontroller (PIC16LF1938) can be programmed through ICSP using a PICKit or other PIC programmer.
 
-[Latest Release](https://github.com/ivanwick/bekantfirmware/releases/latest)
+[Latest Release](https://github.com/diesteinhose/bekantfirmware/releases/latest)
 
 ## Documentation
 
