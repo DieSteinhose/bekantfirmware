@@ -1,6 +1,14 @@
 # BEKANT Firmware
 
-![Position memory diagram](https://github.com/ivanwick/bekantfirmware/wiki/images/diagram.png)
+----
+## FORK
+This is a Fork from https://github.com/ivanwick/bekantfirmware with following change:
+- Double press Up or Down to move to memory positions
+    - I find this much more comfortable than the original logic.
+
+----
+
+![Position memory diagram](https://github.com/diesteinhose/bekantfirmware/desk_diagram_double.svg)
 
 Control firmware for IKEA BEKANT adjustable-height desk with lower and upper memory positions. Can be flashed onto the OEM controller, without changing any hardware.
 
@@ -23,12 +31,12 @@ Downloadable firmware images are built in MPLAB X with the XC8 compiler. The mic
 | Gesture | Action |
 | ------- | ------ |
 | <kbd>△</kbd> | Move up  |
-| <kbd>△</kbd> + <kbd>▽</kbd> | Move up to upper memory position  |
+| <kbd>△</kbd> + <kbd>△</kbd> | Move up to upper memory position  |
 | <kbd>▽</kbd> | Move down |
-| <kbd>▽</kbd> + <kbd>△</kbd> | Move down to lower memory position  |
+| <kbd>▽</kbd> + <kbd>▽</kbd> | Move down to lower memory position  |
 | <kbd>△</kbd><kbd>▽</kbd> (hold 3 sec) | Save current position |
 
-"+" means press the first button, and while holding it, press the second button, then release both. Just like <kbd>Ctrl</kbd> + <kbd>X</kbd>.
+"+" means press the first button, release the button, and press the button again.
 
 Automatic movement to a stored position can be canceled by pressing either button or cutting power.
 

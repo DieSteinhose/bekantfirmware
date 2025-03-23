@@ -59,6 +59,9 @@ bool btn_debounce(ButtonState_t now_btn);
 
 typedef struct {
     uint8_t save_hold;
+    uint8_t double_click_timer;  // Timer for double-click detection
+    bool waiting_for_second_up;  // Flag for detecting double-click up
+    bool waiting_for_second_down; // Flag for detecting double-click down
     INPUT_t state;
 } InputState_t;
 
@@ -66,19 +69,51 @@ typedef struct {
 // 4000 Hz / 200 = 20 Hz
 //   0.05 sec * 60 = 3 sec to hold SAVE gesture
 #define SAVE_HOLD_THRESHOLD 60
+// Time window for double-click in 50ms increments (20 = 1 second)
+#define DOUBLE_CLICK_WINDOW 10
 
 INPUT_t btn_gesture(ButtonState_t btn) {
     static InputState_t input = {
         .save_hold = 0,
+        .double_click_timer = 0,
+        .waiting_for_second_up = false,
+        .waiting_for_second_down = false,
         .state = INPUT_IDLE,
     };
+
+    // Decrement double-click timer if active
+    if (input.double_click_timer > 0) {
+        input.double_click_timer--;
+        
+        // Reset waiting flags if timer expires
+        if (input.double_click_timer == 0) {
+            input.waiting_for_second_up = false;
+            input.waiting_for_second_down = false;
+        }
+    }
 
     switch (input.state) {
         case INPUT_IDLE:
             if (PRESSED(btn.UP) && RELEASED(btn.DOWN)) {
-                input.state = INPUT_UP;
+                if (input.waiting_for_second_up) {
+                    // Double-click up detected
+                    input.waiting_for_second_up = false;
+                    input.double_click_timer = 0;
+                    input.state = INPUT_DOUBLE_UP;
+                } else {
+                    // First up press
+                    input.state = INPUT_UP;
+                }
             } else if (RELEASED(btn.UP) && PRESSED(btn.DOWN)) {
-                input.state = INPUT_DOWN;
+                if (input.waiting_for_second_down) {
+                    // Double-click down detected
+                    input.waiting_for_second_down = false;
+                    input.double_click_timer = 0;
+                    input.state = INPUT_DOUBLE_DOWN;
+                } else {
+                    // First down press
+                    input.state = INPUT_DOWN;
+                }
             } else if (PRESSED(btn.UP) && PRESSED(btn.DOWN)) {
                 input.save_hold++;
                 if (input.save_hold >= SAVE_HOLD_THRESHOLD) {
@@ -87,7 +122,7 @@ INPUT_t btn_gesture(ButtonState_t btn) {
                 } else {
                     input.state = INPUT_IDLE;
                 }
-            } else  { // both RELEASED
+            } else {
                 input.state = INPUT_IDLE;
             }
             break;
@@ -105,9 +140,12 @@ INPUT_t btn_gesture(ButtonState_t btn) {
                 input.state = INPUT_UP;
             } else if (RELEASED(btn.UP) && PRESSED(btn.DOWN)) {
                 input.state = INPUT_DOWN;
+            } else if (RELEASED(btn.UP) && RELEASED(btn.DOWN)) {
+                // Button released, start waiting for second click
+                input.waiting_for_second_up = true;
+                input.double_click_timer = DOUBLE_CLICK_WINDOW;
+                input.state = INPUT_IDLE;
             } else if (PRESSED(btn.UP) && PRESSED(btn.DOWN)) {
-                input.state = INPUT_MEM_UP;
-            } else  { // both RELEASED
                 input.state = INPUT_IDLE;
             }
             break;
@@ -117,34 +155,29 @@ INPUT_t btn_gesture(ButtonState_t btn) {
                 input.state = INPUT_UP;
             } else if (RELEASED(btn.UP) && PRESSED(btn.DOWN)) {
                 input.state = INPUT_DOWN;
+            } else if (RELEASED(btn.UP) && RELEASED(btn.DOWN)) {
+                // Button released, start waiting for second click
+                input.waiting_for_second_down = true;
+                input.double_click_timer = DOUBLE_CLICK_WINDOW;
+                input.state = INPUT_IDLE;
             } else if (PRESSED(btn.UP) && PRESSED(btn.DOWN)) {
-                input.state = INPUT_MEM_DOWN;
-            } else  { // both RELEASED
                 input.state = INPUT_IDLE;
             }
             break;
             
-        case INPUT_MEM_UP:
-            if (PRESSED(btn.UP) && RELEASED(btn.DOWN)) {
-                input.state = INPUT_MEM_UP;
-            } else if (RELEASED(btn.UP) && PRESSED(btn.DOWN)) {
-                input.state = INPUT_DOWN;
-            } else if (PRESSED(btn.UP) && PRESSED(btn.DOWN)) {
-                input.state = INPUT_MEM_UP;
-            } else  { // both RELEASED
+        case INPUT_DOUBLE_UP:
+            if (RELEASED(btn.UP) && RELEASED(btn.DOWN)) {
                 input.state = INPUT_IDLE;
+            } else {
+                input.state = INPUT_DOUBLE_UP;
             }
             break;
             
-        case INPUT_MEM_DOWN:
-            if (PRESSED(btn.UP) && RELEASED(btn.DOWN)) {
-                input.state = INPUT_UP;
-            } else if (RELEASED(btn.UP) && PRESSED(btn.DOWN)) {
-                input.state = INPUT_MEM_DOWN;
-            } else if (PRESSED(btn.UP) && PRESSED(btn.DOWN)) {
-                input.state = INPUT_MEM_DOWN;
-            } else  { // both RELEASED
+        case INPUT_DOUBLE_DOWN:
+            if (RELEASED(btn.UP) && RELEASED(btn.DOWN)) {
                 input.state = INPUT_IDLE;
+            } else {
+                input.state = INPUT_DOUBLE_DOWN;
             }
             break;
     }

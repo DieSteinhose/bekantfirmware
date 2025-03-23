@@ -6,8 +6,8 @@ typedef enum {
     INPUT_IDLE,
     INPUT_UP,
     INPUT_DOWN,
-    INPUT_MEM_UP,
-    INPUT_MEM_DOWN,
+    INPUT_DOUBLE_UP,    // New state for double-click up
+    INPUT_DOUBLE_DOWN,  // New state for double-click down
     INPUT_SAVE,
 } INPUT_t;
 
